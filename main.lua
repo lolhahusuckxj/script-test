@@ -1,9 +1,11 @@
--- CombatCoreV6 by Matt & Copilot
--- SilentAim, Aimbot, AutoShoot, ESP — Knife Mode removed
+-- CombatCoreV7 by Matt & Copilot
+-- Full feature stack: SilentAim, AutoShoot, Aimbot, ESP, ForceField checks
+-- Knife Mode excluded
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
 -- Toggles
@@ -11,10 +13,11 @@ local SilentAimEnabled = false
 local AimbotEnabled = false
 local AutoShootEnabled = false
 local ESPEnabled = false
+local ForceFieldCheckEnabled = true
 
 -- GUI Setup
 local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-gui.Name = "CombatCoreV6"
+gui.Name = "CombatCoreV7"
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 220, 0, 180)
@@ -54,10 +57,17 @@ makeToggle("ESP: OFF", 85, function(btn)
 end)
 
 -- Targeting Logic
+local function isValidTarget(player)
+    if player == LocalPlayer then return false end
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return false end
+    if ForceFieldCheckEnabled and player.Character:FindFirstChildOfClass("ForceField") then return false end
+    return true
+end
+
 local function getClosestTarget()
     local closest, dist = nil, math.huge
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        if isValidTarget(player) then
             local hrp = player.Character.HumanoidRootPart
             local screenPos, onScreen = Workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
             if onScreen then
@@ -121,7 +131,7 @@ end)
 RunService.RenderStepped:Connect(function()
     if ESPEnabled then
         for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if isValidTarget(player) then
                 if not player.Character:FindFirstChild("CombatCoreESP") then
                     local tag = Instance.new("BillboardGui", player.Character.HumanoidRootPart)
                     tag.Name = "CombatCoreESP"
@@ -144,4 +154,4 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-print("[CombatCoreV6] Loaded. SilentAim, Aimbot, AutoShoot, ESP — Knife Mode removed.")
+print("[CombatCoreV7] Loaded. All features active except Knife Mode.")
